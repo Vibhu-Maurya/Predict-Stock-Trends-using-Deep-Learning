@@ -7,6 +7,11 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dropout, Dense
 import os
 import requests
+import matplotlib
+matplotlib.use('Agg') # Non-interactive backend
+import matplotlib.pyplot as plt
+
+plt.style.use("fivethirtyeight")
 
 def train_model(stock="POWERGRID.NS", epochs=50):
     print(f"Starting model training pipeline for stock: {stock}...")
@@ -105,12 +110,26 @@ def train_model(stock="POWERGRID.NS", epochs=50):
     model.compile(optimizer='adam', loss='mean_squared_error')
     
     print(f"Starting model training for {epochs} epochs...")
-    model.fit(x_train, y_train, epochs=epochs, batch_size=32)
+    history = model.fit(x_train, y_train, epochs=epochs, batch_size=32)
     
     # Save the model
     model_name = 'stock_dl_model.h5'
     model.save(model_name)
     print(f"Model successfully trained and saved to: {model_name}!")
+    
+    # Generate and save model training loss graph
+    print("Generating training loss graph...")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(history.history['loss'], 'r', label='Training Loss (MSE)', linewidth=2)
+    ax.set_title(f"Model Training Loss over Epochs ({stock})")
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Loss (MSE)")
+    ax.legend()
+    os.makedirs('static', exist_ok=True)
+    loss_chart_path = "static/training_loss.png"
+    fig.savefig(loss_chart_path, bbox_inches='tight', facecolor='#1f2328', edgecolor='none')
+    plt.close(fig)
+    print(f"Training loss graph saved to: {loss_chart_path}")
 
 if __name__ == '__main__':
     # Train the model (uses default POWERGRID.NS stock and 50 epochs)
