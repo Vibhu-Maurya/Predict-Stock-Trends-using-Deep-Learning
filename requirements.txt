@@ -1,0 +1,10 @@
+flask
+yfinance
+pandas
+numpy
+matplotlib
+scikit-learn
+tensorflow
+keras
+h5py
+requests
