@@ -1,0 +1,29 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyCharm / VS Code
+.idea/
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Dynamically generated assets in static folder
+static/ema_20_50_*.png
+static/ema_100_200_*.png
+static/stock_prediction_*.png
+static/*_dataset_*.csv
+
+# Excel/CSV files generated locally
+static/*_dataset.csv
+!static/AAPL_dataset.csv
+!static/POWERGRID.NS_dataset.csv
+
+# Saved HTML webpages and their resources
+*Chando0185*
+*Event Registration*
+index,html
+kitten,png.png
+stock.py
