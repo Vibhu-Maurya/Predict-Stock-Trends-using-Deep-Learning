@@ -13,7 +13,9 @@ def train_model(stock="POWERGRID.NS", epochs=50):
     start = dt.datetime(2000, 1, 1)
     end = dt.datetime(2024, 11, 1)
 
-    # Download stock data
+    df = pd.DataFrame()
+    
+    # Try downloading first
     try:
         session = requests.Session()
         session.headers.update({
@@ -22,17 +24,42 @@ def train_model(stock="POWERGRID.NS", epochs=50):
         df = yf.download(stock, start=start, end=end, session=session)
     except Exception as e:
         print(f"Error downloading stock data: {e}")
-        # Try fallback dataset
-        fallback = f"static/{stock}_dataset.csv"
-        if os.path.exists(fallback):
-            print(f"Loading local fallback file: {fallback}")
-            df = pd.read_csv(fallback, header=[0, 1], index_col=0, parse_dates=True)
-        else:
-            raise RuntimeError(f"Could not load data for training on stock: {stock}")
+        df = pd.DataFrame()
 
-    # Flatten columns if MultiIndex
-    if isinstance(df.columns, pd.MultiIndex):
+    # If download is empty, check for local fallback files
+    if df.empty or len(df) < 150:
+        print(f"Download returned no data. Searching for local fallback dataset for {stock}...")
+        fallback_paths = [
+            f"static/{stock}_dataset.csv",
+            f"static/{stock.upper()}_dataset.csv",
+            f"{stock.lower()}_dataset.csv",
+            "powergrid.csv" if "POWERGRID" in stock.upper() else None
+        ]
+        # Filter existing paths
+        fallback_paths = [p for p in fallback_paths if p and os.path.exists(p)]
+        
+        if fallback_paths:
+            csv_path = fallback_paths[0]
+            print(f"Loading local fallback file: {csv_path}")
+            try:
+                # Try reading with MultiIndex headers first
+                df = pd.read_csv(csv_path, header=[0, 1], index_col=0, parse_dates=True)
+                if 'Close' not in df.columns.get_level_values(0):
+                    # Try single header
+                    df = pd.read_csv(csv_path, index_col=0, parse_dates=True)
+            except Exception as read_err:
+                print(f"Error reading local CSV {csv_path}: {read_err}")
+                try:
+                    df = pd.read_csv(csv_path, index_col=0, parse_dates=True)
+                except Exception:
+                    pass
+                    
+    # Flatten columns if they are MultiIndex
+    if not df.empty and isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
+
+    if df.empty or len(df) < 150:
+        raise RuntimeError(f"Could not load sufficient data for training on stock: {stock}")
 
     # We only need the Close price column
     df_close = pd.DataFrame(df['Close'])
