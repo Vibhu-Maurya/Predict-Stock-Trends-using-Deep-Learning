@@ -13,6 +13,7 @@ Featuring a modern, dark-mode glassmorphic user interface, it provides investors
 * **Robust Fallback Engine**: Seamlessly falls back to local pre-loaded historical datasets (e.g., AAPL, POWERGRID.NS) if Yahoo Finance API encounters network rate limits.
 * **Premium User Interface**: Modern responsive UI with dark aesthetics, glassmorphism cards, interactive stock selection tags, blur loaders, and data table rendering.
 * **Dataset Exporting**: Export downloaded real-time historical pricing data directly to a CSV file.
+* **Model Training Script**: Dedicated script `stock.py` to re-train the LSTM neural network model on custom epochs and generate a training loss graph.
 
 ---
 
@@ -49,7 +50,14 @@ Clone the repository and install the required Python packages:
 pip install flask yfinance pandas numpy matplotlib scikit-learn tensorflow keras h5py requests
 ```
 
-### 3. Running the Application
+### 3. Training the Model from Scratch
+To re-train the LSTM model and generate a training loss graph:
+```bash
+python stock.py
+```
+This will train the model for 50 epochs on the selected ticker, save the newly trained weights to `stock_dl_model.h5`, and generate a training loss graph as `static/training_loss.png`.
+
+### 4. Running the Application
 Launch the Flask development server:
 ```bash
 python app.py
@@ -62,6 +70,7 @@ Open your browser and navigate to `http://127.0.0.1:5000` to start analyzing sto
 
 ```
 ├── app.py                      # Main Flask application and predictive backend
+├── stock.py                    # Model training script (runs training offline)
 ├── stock_dl_model.h5           # Pre-trained multi-layer LSTM Keras model
 ├── templates/
 │   └── index.html              # Premium dark-mode dashboard interface
